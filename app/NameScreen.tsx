@@ -1,11 +1,13 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-
+import { SaveUser } from '../apis/userRegister';
+import { useUser } from '../context/UserContext'; 
 const NameScreen = () => {
   const router = useRouter();
   const { isNewUser, mobilenumber } = useLocalSearchParams();
   const [name, setName] = useState('');
+  const { setUser } = useUser();
 
   const isNewUserBool = isNewUser === 'true';
 
@@ -28,14 +30,17 @@ const NameScreen = () => {
 const handleContinue = async () => {
   if (name.trim()) {
     try {
-      //await SaveUser(payload);
+      const response=await SaveUser(payload);
+      console.log("Response from SaveUser:", response);
+setUser(response.user);
       console.log('✅ User saved successfully:', name);
       router.replace({
         pathname: '(tabs)',
         params: { welcomeBack: 'false', name },
       });
     } catch (error) {
-      console.error('❌ Error saving user:', error);
+
+      // console.error('❌ Error saving user:', error);
     }
   } else {
     console.log('⚠️ Please enter your name.');

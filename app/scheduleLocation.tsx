@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useUser } from "../context/UserContext";
 
 const statesOfIndia = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
@@ -36,7 +37,7 @@ const LocationScreen = () => {
   const [manualEntry, setManualEntry] = useState(false);
   const [locationCard, setLocationCard] = useState(false);
   const [loading, setLoading] = useState(false);
-
+const { setAddress } = useUser();
   const [houseNo, setHouseNo] = useState("");
   const [landmark, setLandmark] = useState("");
   const [city, setCity] = useState("");
@@ -89,13 +90,16 @@ const LocationScreen = () => {
     const address = await Location.reverseGeocodeAsync(loc.coords);
     const addr = address[0];
     const formatted = `${addr.name || ""}, ${addr.street || ""}, ${addr.city || ""}`;
-
+setAddress({
+      street: addr.street || "",
+      city: addr.city || "",
+      state: addr.region || "",
+      pincode: pincode || "",
+    });
     router.push({
       pathname: "/mapScreen",
       params: {
         imageUri,
-        initialLat: loc.coords.latitude,
-        initialLng: loc.coords.longitude,
         initialAddress: formatted,
       },
     });
@@ -121,6 +125,12 @@ const LocationScreen = () => {
     if (manualEntry && houseNo && landmark && city && selectedState && pincode) {
       finalLocation = `${houseNo}, ${landmark}, ${city}, ${selectedState} - ${pincode}`;
     }
+    setAddress({
+      street: `${houseNo}, ${landmark}`,
+      city: city,
+      state: selectedState,
+      pincode: pincode,
+    })
     router.push({
       pathname: "/scheduleMaterial",
       params: { imageUri, location: finalLocation },

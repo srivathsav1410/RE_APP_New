@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +25,8 @@
         }
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.REApp"
+      "package": "com.anonymous.REApp",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "bundler": "metro",
@@ -49,6 +53,9 @@
       "eas": {
         "projectId": "f6e4aa55-f709-4c46-97f8-b9f1b643c5d0"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f6e4aa55-f709-4c46-97f8-b9f1b643c5d0"
     }
   }
 }

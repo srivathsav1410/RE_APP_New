@@ -11,11 +11,15 @@ import {
 } from "react-native";
 import MapView, { Marker, MapPressEvent, PROVIDER_GOOGLE } from "react-native-maps";
 
+import { useUser} from "../context/UserContext";
+
+
 export default function MapPicker() {
   const router = useRouter();
   const [region, setRegion] = useState<any>(null);
   const [marker, setMarker] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+const { setAddress } = useUser();
 
   useEffect(() => {
     (async () => {
@@ -34,10 +38,13 @@ export default function MapPicker() {
         longitudeDelta: 0.01,
       };
       setRegion(initialRegion);
+
+      // Use a custom marker at user location
       setMarker({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       });
+
       setLoading(false);
     })();
   }, []);
@@ -46,17 +53,37 @@ export default function MapPicker() {
     setMarker(event.nativeEvent.coordinate);
   };
 
-  const handleConfirm = () => {
-    if (!marker) return;
+const handleConfirm = async () => {
+  if (!marker) return;
 
+  try {
+    // Get address from coordinates
+    const [address] = await Location.reverseGeocodeAsync({
+      latitude: marker.latitude,
+      longitude: marker.longitude,
+    });
+console.log("Reverse geocoded address:", address);
+    const formattedAddress = address
+      ? `${address.name || ""}, ${address.street || ""}, ${address.city || ""}, ${address.region || ""}, ${address.country || ""}`
+      : "Address not found";
+setAddress({
+      street: address.street || "",
+      city: address.city || "",
+      state: address.region || "",
+      pincode: address.postalCode || "",
+    });
+    // Navigate with latitude, longitude, and address
     router.push({
       pathname: "/scheduleMaterial",
       params: {
-        latitude: marker.latitude.toString(),
-        longitude: marker.longitude.toString(),
+        address: formattedAddress,
       },
     });
-  };
+  } catch (error) {
+    console.error("Error fetching address: ", error);
+    alert("Unable to fetch address. Please try again.");
+  }
+};
 
   if (loading || !region) {
     return (
@@ -70,17 +97,17 @@ export default function MapPicker() {
   return (
     <SafeAreaView style={styles.container}>
       <MapView
-        provider={PROVIDER_GOOGLE} // ensures Google Maps is used on both iOS and Android
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={region}
         onPress={handleMapPress}
-        showsUserLocation
-        showsMyLocationButton
+        showsUserLocation={false} // hide default blue dot
       >
         {marker && (
           <Marker
             coordinate={marker}
             draggable
+            pinColor="#4CAF50" // green pin to differentiate
             onDragEnd={(e) => setMarker(e.nativeEvent.coordinate)}
           />
         )}

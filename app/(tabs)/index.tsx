@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useUser } from '../../context/UserContext';
 
 const UserRegistered = () => {
   const { name, welcomeBack } = useLocalSearchParams();
@@ -17,7 +19,11 @@ const UserRegistered = () => {
   const goToSchedule = () => {
     router.replace('/scheduleLocation');
   };
+const token=  AsyncStorage.getItem("userToken");
+  console.log("Token from AsyncStorage:", token);
+    const { user } = useUser();
 
+  console.log("User from context in index:", user);
   return (
     <View style={styles.container}>
       <ScrollView
@@ -26,7 +32,7 @@ const UserRegistered = () => {
       >
         {/* Welcome Text */}
         <Text style={styles.welcomeText}>
-          {isWelcomeBack ? 'Welcome back!' : `Welcome ${name}!`}
+          {isWelcomeBack ? ` Welcome back ${user?.userName}!` : `Welcome ${user?.userName}!`}
         </Text>
 
         {/* Schedule Pickup Section */}
