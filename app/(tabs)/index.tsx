@@ -48,20 +48,17 @@ const token=  AsyncStorage.getItem("userToken");
             Schedule a pickup for your waste.{"\n"}Choose your preferred date and time.
           </Text>
           <TouchableOpacity style={styles.scheduleButton} onPress={goToSchedule}>
-            <Text style={styles.scheduleButtonText}>Schedule</Text>
+            <Text style={styles.scheduleButtonText}>Schedule Pickup</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Upcoming Pickups Section */}
-        <Text style={styles.sectionTitle}>Upcoming Pickups</Text>
-        <View style={styles.upcomingCard}>
-          <Text style={styles.upcomingTitle}>No Upcoming Pickups</Text>
-          <Text style={styles.upcomingText}>
-            You don’t have any pickups scheduled.{"\n"}Tap the button above to schedule one.
+       {/* Quote Section */}
+        <View style={styles.quoteCard}>
+          <Text style={styles.quoteMark}>“</Text>
+          <Text style={styles.quoteText}>
+            Turn trash into cash –{"\n"}Recycle today!. 🌍
           </Text>
-          <TouchableOpacity style={styles.scheduleSecondary} onPress={goToSchedule}>
-            <Text style={styles.scheduleSecondaryText}>Schedule Pickup</Text>
-          </TouchableOpacity>
+          <Text style={styles.quoteMarkRight}>”</Text>
         </View>
       </ScrollView>
     </View>
@@ -77,31 +74,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 50,
     paddingBottom: 100,
-    backgroundColor: '#F0FDF4', 
+    backgroundColor: '#F0FDF4',
   },
- welcomeText: {
-  fontSize: 26, // bigger
-  fontWeight: '800', // bolder
-  fontFamily: 'sans-serif-medium', // optional, use your preferred font
-//  color: '#4ade80',
-  marginBottom: 20,
-  textAlign: 'center',
-},
-
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 12,
+  welcomeText: {
+    fontSize: 26,
+    fontWeight: '800',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   card: {
-    backgroundColor: '#ffff',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
   },
   truckImage: {
     width: '100%',
-    height: 150,
+    height: 160,
     marginBottom: 16,
   },
   cardTitle: {
@@ -123,34 +116,40 @@ const styles = StyleSheet.create({
   },
   scheduleButtonText: {
     fontWeight: '600',
+    color: '#fff',
   },
-  upcomingCard: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderStyle: 'dashed',
-    borderRadius: 12,
-    padding: 20,
+
+  // Quote Card
+  quoteCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    elevation: 2,
   },
-  upcomingTitle: {
-    fontWeight: '700',
-    fontSize: 16,
-    marginBottom: 8,
+  quoteMark: {
+    fontSize: 36,
+    color: '#4ade80',
+    fontWeight: '900',
+    alignSelf: 'flex-start',
   },
-  upcomingText: {
+  quoteMarkRight: {
+    fontSize: 36,
+    color: '#4ade80',
+    fontWeight: '900',
+    alignSelf: 'flex-end',
+  },
+  quoteText: {
+    fontSize: 18,
+    fontStyle: 'italic',
+    color: '#333',
     textAlign: 'center',
-    color: '#444',
-    marginBottom: 16,
-  },
-  scheduleSecondary: {
-    backgroundColor: '#4ade80',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  scheduleSecondaryText: {
-    fontWeight: '600',
+    marginVertical: 10,
+    lineHeight: 26,
   },
 });
 

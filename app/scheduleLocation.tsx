@@ -3,6 +3,7 @@ import { Picker } from "@react-native-picker/picker";
 import * as Linking from "expo-linking";
 import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
+
 import { useState } from "react";
 import {
   Alert,
@@ -27,7 +28,7 @@ const statesOfIndia = [
   "Uttar Pradesh", "Uttarakhand", "West Bengal"
 ].sort();
 
-const serviceablePincodes = ["500001", "500002", "600001", "110001"];
+const serviceablePincodes = /^[1-9][0-9]{5}$/;
 
 const LocationScreen = () => {
   const router = useRouter();
@@ -60,7 +61,7 @@ const { setAddress } = useUser();
   };
 
   const checkPincode = () => {
-    if (serviceablePincodes.includes(pincode)) {
+    if (serviceablePincodes.test(pincode)) {
       setNotServiceable(false);
       setLocationCard(true);
     } else {
@@ -155,6 +156,7 @@ setAddress({
             <TextInput
               placeholder="Pincode"
               style={styles.input}
+              maxLength={6}
               keyboardType="number-pad"
               value={pincode}
               onChangeText={setPincode}
@@ -207,6 +209,7 @@ setAddress({
         {/* Step 3: Manual Entry */}
         {manualEntry && (
           <>
+          <Text style={styles.label}>House Number</Text>
             <TextInput
               placeholder="House Number"
               style={styles.input}
@@ -215,6 +218,7 @@ setAddress({
             />
             {errors.houseNo && <Text style={styles.errorText}>{errors.houseNo}</Text>}
 
+            <Text style={styles.label}>Landmark</Text>
             <TextInput
               placeholder="Landmark"
               style={styles.input}
@@ -223,6 +227,7 @@ setAddress({
             />
             {errors.landmark && <Text style={styles.errorText}>{errors.landmark}</Text>}
 
+          <Text style={styles.label}>City</Text>
             <TextInput
               placeholder="City"
               style={styles.input}
@@ -232,10 +237,12 @@ setAddress({
             {errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
 
             {/* State Picker */}
+            <Text style={styles.label}>State</Text>
             <View style={styles.pickerWrapper}>
               <Picker
                 selectedValue={selectedState}
                 onValueChange={(value) => setSelectedState(value)}
+                style={{ color: "#000" }}
               >
                 <Picker.Item label="Select State" value="" />
                 {statesOfIndia.map((st) => (
@@ -246,6 +253,7 @@ setAddress({
             {errors.selectedState && <Text style={styles.errorText}>{errors.selectedState}</Text>}
 
             {/* Pincode (disabled, pre-filled) */}
+            <Text style={styles.label}>Pincode</Text>
             <TextInput
               placeholder="Pincode"
               style={[styles.input, { backgroundColor: "#e5e7eb" }]}
@@ -294,6 +302,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
     color: "#222",
+  },
+    label: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4,
+    marginTop: 10,
+    color: "#333",
   },
   input: {
     borderWidth: 1,
