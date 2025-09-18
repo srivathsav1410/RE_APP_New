@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Checkbox } from "expo-checkbox";
+import Checkbox from "expo-checkbox";
 import { router, useLocalSearchParams } from "expo-router";
-import { use, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Image,
   ScrollView,
   StyleSheet,
@@ -13,14 +14,13 @@ import {
 } from "react-native";
 import { MultiSelect } from "react-native-element-dropdown";
 import * as ImagePicker from "expo-image-picker";
-import { imageUpload,placeOrder } from "../apis/userRegister";
+import { imageUpload, placeOrder } from "../apis/userRegister";
 import { useUser } from "../context/UserContext";
 
 const materialOptions = [
   "Plastic",
   "Paper",
   "Metal",
-  "E-waste",
   "Glass",
   "Organic waste",
   "Others",
@@ -30,7 +30,6 @@ const subOptionsMap: Record<string, string[]> = {
   Plastic: ["Bottles", "Containers", "Bags"],
   Paper: ["Newspapers", "Cardboards", "Magazines", "Books"],
   Metal: ["Cans", "Foil", "Scrap Metal"],
-  "E-waste": ["Electronics", "Batteries", "Cables"],
   Glass: ["Jars", "Glass Bottles", "Containers"],
   "Organic waste": ["Food Scraps", "Yard Waste"],
 };
@@ -42,32 +41,31 @@ const MaterialScreen = () => {
   const [uploadImage, setUploadImage] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-   const [imageUrl, setImageUrl] = useState<any>(null);
-  const { user,address } = useUser();
-
+  const [imageUrl, setImageUrl] = useState<any>(null);
+  const { user, address } = useUser();
   const { latitude, longitude } = useLocalSearchParams();
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const allSubOptions = selectedMaterials.flatMap(
     (m) => subOptionsMap[m] || []
   );
 
   const pickImage = async () => {
-const result = await ImagePicker.launchImageLibraryAsync({
-  mediaTypes: ['images'], 
-  allowsEditing: true,
-  aspect: [4, 4],
-  quality: 0.7,
-});
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 4],
+      quality: 0.7,
+    });
 
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
-  
 
-  const response = await imageUpload(result?.assets[0]?.uri);
-  console.log("Image upload response:", response);
-  setImageUrl(response);
-    
-  }
+      const response = await imageUpload(result.assets[0].uri);
+      console.log("Image upload response:", response);
+      setImageUrl(response);
+    }
   };
 
   const takePhoto = async () => {
@@ -77,87 +75,115 @@ const result = await ImagePicker.launchImageLibraryAsync({
       quality: 0.7,
     });
 
-    if (!result.canceled){
+    if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
-        const response=  await imageUpload(result.assets[0].uri);
-setImageUrl(response);
-  console.log("Image upload response:", response);
+      const response = await imageUpload(result.assets[0].uri);
+      setImageUrl(response);
+      console.log("Image upload response:", response);
     }
   };
 
   const removeImage = () => {
-
     setSelectedImage(null);
   };
 
   const handleSubmit = async () => {
-    // const items=selectedMaterials.map()
-  let subItemCounter = 1; // global counter for unique subItemIds
+    let subItemCounter = 1;
 
-const itemsPayload = selectedMaterials.map((material, index) => {
-  const itemId = index + 1; // assign an incremental ID
-  let name = material;
+    const itemsPayload = selectedMaterials.map((material, index) => {
+      const itemId = index + 1;
+      let name = material;
 
-  if (material === "Others" && customMaterial) {
-    name = customMaterial;
-  }
+      if (material === "Others" && customMaterial) {
+        name = customMaterial;
+      }
 
-  const subItems = selectedSubOptions
-    .filter((sub) => (subOptionsMap[material] || []).includes(sub))
-    .map((sub) => ({
-      subItemId: subItemCounter++, // globally unique
-      itemId,
-      name: sub,
-    }));
+      const subItems = selectedSubOptions
+        .filter((sub) => (subOptionsMap[material] || []).includes(sub))
+        .map((sub) => ({
+          subItemId: subItemCounter++,
+          itemId,
+          name: sub,
+        }));
 
-  return {
-    itemId,
-    name,
-    subItems,
-  };
-});
+      return {
+        itemId,
+        name,
+        subItems,
+      };
+    });
 
-console.log("Items Payload:", JSON.stringify(itemsPayload, null, 2));
-console.log(address)
-console.log(imageUrl)
+    console.log("Items Payload:", JSON.stringify(itemsPayload, null, 2));
+    console.log(address);
+    console.log(imageUrl);
 
-    let jsonData:any={
-userId:user?.userId,
-address:address,
-items:itemsPayload,
-imageUrl:imageUrl
+    let jsonData: any = {
+      userId: user?.userId,
+      address: address,
+      items: itemsPayload,
+      imageUrl: imageUrl,
+    };
+
+    try {
+      const res = await placeOrder(jsonData);
+      console.log("Order placed successfully:", res);
+      setShowSuccess(true);
+
+      // Trigger fade-in
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    } catch (err: any) {
+      console.log(
+        "Error placing order:",
+        err.response?.data || err.message || err
+      );
     }
-
- try {
-  const res = await placeOrder(jsonData);
-  console.log("Order placed successfully:", res);
-  setShowSuccess(true);
-} catch (err: any) {
-  console.log("Error placing order:", err.response?.data || err.message || err);
-}
   };
 
   useEffect(() => {
     if (showSuccess) {
       const timer = setTimeout(() => {
-        setShowSuccess(false);
-        router.push("(tabs)");
-      }, 5000);
+        // Trigger fade-out before hiding
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start(() => {
+          setShowSuccess(false);
+          router.push("(tabs)");
+        });
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [showSuccess]);
 
   return (
     <View style={styles.container}>
-   {showSuccess && (
-  <View style={styles.successBanner}>
-    <Ionicons name="checkmark-circle" size={40} color="#16a34a" />
-    <Text style={styles.successTitle}>Order Successful!</Text>
-    <Text style={styles.successMessage}>
-      Thank you for your order. We’ll process it soon 🚀
-    </Text>
-  </View>
-)}
+      {/* ✅ Success Overlay */}
+      {showSuccess && (
+        <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
+          <View style={styles.successCard}>
+            <Ionicons name="checkmark-circle" size={70} color="#16a34a" />
+            <Text style={styles.successTitle}>Order Successful!</Text>
+            <Text style={styles.successMessage}>
+              Thank you for your order. We’ll process it soon 🚀
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => {
+                setShowSuccess(false);
+                router.push("(tabs)");
+              }}
+              style={styles.closeButton}
+            >
+              <Text style={styles.closeText}>Go to Home</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      )}
 
       <ScrollView
         contentContainerStyle={styles.content}
@@ -172,11 +198,12 @@ imageUrl:imageUrl
 
         <Text style={styles.title}>Please select material type</Text>
 
-        {(address) && (
+        {address && (
           <View style={styles.locationCard}>
             <Text style={styles.locationText}>📍 Location Selected:</Text>
             <Text style={styles.coords}>
-              {address.street}, {address.city}, {address.state} - {address.pincode}
+              {address.street}, {address.city}, {address.state} -{" "}
+              {address.pincode}
             </Text>
           </View>
         )}
@@ -220,7 +247,9 @@ imageUrl:imageUrl
 
         {/* ✅ Sub-options */}
         {selectedMaterials.length > 0 && (
-          <View style={[styles.locationCard, { zIndex: 999, overflow: "visible" }]}>
+          <View
+            style={[styles.locationCard, { zIndex: 999, overflow: "visible" }]}
+          >
             <Text style={styles.cardTitle}>Select Sub-options</Text>
             <MultiSelect
               style={styles.dropdown}
@@ -259,13 +288,21 @@ imageUrl:imageUrl
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
-                <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
+              <View
+                style={{ flexDirection: "row", justifyContent: "space-around" }}
+              >
+                <TouchableOpacity
+                  style={styles.uploadButton}
+                  onPress={pickImage}
+                >
                   <Ionicons name="image-outline" size={22} color="#000" />
                   <Text style={styles.uploadText}>Gallery</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.uploadButton} onPress={takePhoto}>
+                <TouchableOpacity
+                  style={styles.uploadButton}
+                  onPress={takePhoto}
+                >
                   <Ionicons name="camera-outline" size={22} color="#000" />
                   <Text style={styles.uploadText}>Camera</Text>
                 </TouchableOpacity>
@@ -275,7 +312,10 @@ imageUrl:imageUrl
         )}
 
         <View
-          style={[styles.locationCard, { flexDirection: "row", alignItems: "center" }]}
+          style={[
+            styles.locationCard,
+            { flexDirection: "row", alignItems: "center" },
+          ]}
         >
           <Checkbox
             value={uploadImage}
@@ -299,7 +339,6 @@ export default MaterialScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F0FDF4" },
-  successText: { color: "#166534", fontSize: 16, fontWeight: "600" },
   backArrow: { marginBottom: 10, alignSelf: "flex-start" },
   content: { paddingTop: 60, paddingBottom: 60, paddingHorizontal: 20 },
   title: {
@@ -310,39 +349,29 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   locationCard: {
-  backgroundColor: "#fff",
-  padding: 16,
-  borderRadius: 12,
-  marginBottom: 16,
-  shadowColor: "#000",
-  shadowOpacity: 0.08,
-  shadowRadius: 6,
-  elevation: 3,
-  borderWidth: 1,
-  borderColor: "#4ade80", // light green border to highlight
-},
-locationText: { 
-  fontSize: 16, 
-  fontWeight: "700", // bold
-  color: "#166534",  // dark green for title
-  marginBottom: 6,
-},
-coords: { 
-  fontSize: 15, 
-  fontWeight: "600", // semi-bold
-  color: "#111",     // darker text
-  textAlign: "center",
-  lineHeight: 20,
-},
-  card: {
     backgroundColor: "#fff",
-    borderRadius: 10,
     padding: 16,
-    marginTop: 20,
+    borderRadius: 12,
+    marginBottom: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: "#4ade80",
+  },
+  locationText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#166534",
+    marginBottom: 6,
+  },
+  coords: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#111",
+    textAlign: "center",
+    lineHeight: 20,
   },
   cardTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12, color: "#222" },
   optionRow: {
@@ -413,29 +442,44 @@ coords: {
     alignItems: "center",
   },
   submitText: { fontSize: 18, fontWeight: "700", color: "#000" },
-  successBanner: {
-  backgroundColor: "#dcfce7",
-  padding: 20,
-  alignItems: "center",
-  justifyContent: "center",
-  borderRadius: 12,
-  margin: 16,
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowRadius: 6,
-  elevation: 3,
-},
-successTitle: {
-  fontSize: 20,
-  fontWeight: "700",
-  color: "#166534",
-  marginTop: 10,
-},
-successMessage: {
-  fontSize: 14,
-  color: "#065f46",
-  marginTop: 6,
-  textAlign: "center",
-},
 
+  // ✅ Success Overlay Styles
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  successCard: {
+    backgroundColor: "#fff",
+    padding: 30,
+    borderRadius: 20,
+    alignItems: "center",
+    width: "80%",
+  },
+  successTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginTop: 10,
+    color: "#166534",
+  },
+  successMessage: {
+    fontSize: 16,
+    color: "#444",
+    textAlign: "center",
+    marginTop: 8,
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: "#4ade80",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  closeText: { color: "#000", fontWeight: "600", fontSize: 16 },
 });

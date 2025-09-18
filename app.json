@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "REApp",
-    "slug": "REApp",
+    "name": "Re Group",
+    "slug": "re-app-new",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/appIcon.png",
     "scheme": "reapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -15,18 +15,19 @@
       }
     },
     "android": {
+      "package": "com.anonymous.REApp",
+      "googleServicesFile": "./google-services.json",
+      "edgeToEdgeEnabled": true,
+      "runtimeVersion": "1.0.0",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/appIcon.png",
         "backgroundColor": "#ffffff"
       },
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyD9F1Ly2saFfMuJmg6b3W-Zr3QK4buvfJ4"
         }
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.REApp",
-      "runtimeVersion": "1.0.0"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -51,11 +52,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "f6e4aa55-f709-4c46-97f8-b9f1b643c5d0"
+        "projectId": "7306b5aa-e785-439c-ae2d-b8e849d25f47"
       }
-    },
-    "updates": {
-      "url": "https://u.expo.dev/f6e4aa55-f709-4c46-97f8-b9f1b643c5d0"
     }
   }
 }
