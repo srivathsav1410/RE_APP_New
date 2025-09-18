@@ -36,7 +36,6 @@ const LocationScreen = () => {
 
   const [pincode, setPincode] = useState("");
   const [manualEntry, setManualEntry] = useState(false);
-  const [locationCard, setLocationCard] = useState(false);
   const [loading, setLoading] = useState(false);
 const { setAddress } = useUser();
   const [houseNo, setHouseNo] = useState("");
@@ -47,27 +46,24 @@ const { setAddress } = useUser();
     pickedLocation ? decodeURIComponent(pickedLocation as string) : ""
   );
 
-  const [notServiceable, setNotServiceable] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleBack = () => {
     if (manualEntry) {
       setManualEntry(false);
-    } else if (locationCard) {
-      setLocationCard(false);
     } else {
       router.replace({ pathname: "(tabs)" });
     }
   };
 
-  const checkPincode = () => {
-    if (serviceablePincodes.test(pincode)) {
-      setNotServiceable(false);
-      setLocationCard(true);
-    } else {
-      setNotServiceable(true);
-    }
-  };
+  // const checkPincode = () => {
+  //   if (serviceablePincodes.test(pincode)) {
+  //     setNotServiceable(false);
+  //     setLocationCard(true);
+  //   } else {
+  //     setNotServiceable(true);
+  //   }
+  // };
 
   const handleUseCurrentLocation = async () => {
     setLoading(true);
@@ -95,7 +91,7 @@ setAddress({
       street: addr.street || "",
       city: addr.city || "",
       state: addr.region || "",
-      pincode: pincode || "",
+      pincode: addr.postalCode  || "",
     });
     router.push({
       pathname: "/mapScreen",
@@ -149,7 +145,7 @@ setAddress({
           <Ionicons name="arrow-back" size={28} color="#333" />
         </TouchableOpacity>
 
-        {/* Step 1: Enter Pincode */}
+        {/* Step 1: Enter Pincode
         {!locationCard && !manualEntry && (
           <>
             <Text style={styles.title}>Enter your Pincode</Text>
@@ -158,7 +154,6 @@ setAddress({
               style={styles.input}
               maxLength={6}
               keyboardType="number-pad"
-              value={pincode}
               onChangeText={setPincode}
             />
             <TouchableOpacity style={styles.button} onPress={checkPincode}>
@@ -168,7 +163,7 @@ setAddress({
             {notServiceable && (
               <View style={styles.alertBox}>
                 <Text style={styles.alertText}>
-                  ❌ Sorry, we are currently not available in your area.
+                  Sorry, we are currently not available in your area.
                 </Text>
                 <TouchableOpacity
                   style={styles.homeButton}
@@ -179,10 +174,10 @@ setAddress({
               </View>
             )}
           </>
-        )}
+        )} */}
 
         {/* Step 2: Address Options */}
-        {locationCard && !manualEntry && (
+        { !manualEntry && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>What’s your address?</Text>
             <Text style={styles.cardSubtitle}>
@@ -255,11 +250,13 @@ setAddress({
             {/* Pincode (disabled, pre-filled) */}
             <Text style={styles.label}>Pincode</Text>
             <TextInput
-              placeholder="Pincode"
-              style={[styles.input, { backgroundColor: "#e5e7eb" }]}
-              value={pincode}
-              editable={false}
-            />
+                placeholder="Pincode"
+                style={styles.input}
+                value={pincode}
+                keyboardType="number-pad"
+                maxLength={6}
+                onChangeText={setPincode}
+              />
             {errors.pincode && <Text style={styles.errorText}>{errors.pincode}</Text>}
 
             {/* If user picked location from map, show it */}

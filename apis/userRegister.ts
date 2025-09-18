@@ -1,11 +1,11 @@
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import * as FileSystem from "expo-file-system";
 
 export const SaveUser = async (payload:any) => {
   const accessToken = await  AsyncStorage.getItem("accessToken");
 const response = await axios.post(
-      'https://reappbackend-c4cuaygbgehpdvfm.centralindia-01.azurewebsites.net/api/User/SaveData',
+      'https://reappbackend-c4cuaygbgehpdvfm.centralindia-01.azurewebsites.net/api/User/save-user',
         payload,
         {
           headers: {

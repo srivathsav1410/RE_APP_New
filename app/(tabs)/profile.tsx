@@ -165,8 +165,6 @@ export default function ProfileScreen() {
               </>
             )}
           </View>
-
-          <Text style={styles.memberSince}>Member since Jan 2024</Text>
         </View>
 
         {/* Settings Section */}

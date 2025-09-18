@@ -155,7 +155,7 @@ const MaterialScreen = () => {
           setShowSuccess(false);
           router.push("(tabs)");
         });
-      }, 4000);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [showSuccess]);
