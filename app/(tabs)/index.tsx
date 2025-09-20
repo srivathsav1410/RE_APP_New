@@ -10,6 +10,9 @@ import {
 } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useUser } from '../../context/UserContext';
+import { BackHandler } from "react-native";
+import { useEffect } from "react";
+
 
 const UserRegistered = () => {
   const { name, welcomeBack } = useLocalSearchParams();
@@ -24,6 +27,21 @@ const token=  AsyncStorage.getItem("userToken");
     const { user } = useUser();
 
   console.log("User from context in index:", user);
+
+  useEffect(() => {
+  const backAction = () => {
+    BackHandler.exitApp(); // exit app on back press
+    return true; // prevent default behavior
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove(); // cleanup
+}, []);
+
   return (
     <View style={styles.container}>
       <ScrollView

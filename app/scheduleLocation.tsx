@@ -17,6 +17,9 @@ import {
   View,
 } from "react-native";
 import { useUser } from "../context/UserContext";
+import { useEffect } from "react";
+import { BackHandler } from "react-native";
+
 
 const statesOfIndia = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
@@ -55,6 +58,20 @@ const { setAddress } = useUser();
       router.replace({ pathname: "(tabs)" });
     }
   };
+
+  useEffect(() => {
+  const backAction = () => {
+    handleBack();
+    return true; // prevent default exit behavior
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove(); // cleanup on unmount
+}, [manualEntry]);
 
   // const checkPincode = () => {
   //   if (serviceablePincodes.test(pincode)) {
