@@ -14,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from 'expo-router';
 import { useUser } from '../../context/UserContext';
 import { upadateName } from '@/apis/userRegister';
+import { BackHandler } from "react-native";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -32,6 +33,21 @@ export default function ProfileScreen() {
       setTempName(user.userName);
     }
   }, [user?.userName]);
+
+  // navigate back to tabs
+  useEffect(() => {
+  const backAction = () => {
+    router.replace("(tabs)"); // navigate back to tabs
+    return true; // prevent default behavior
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove(); // cleanup
+}, []);
 
   const handleLogout = async () => {
     Alert.alert(

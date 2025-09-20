@@ -13,6 +13,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getOrderHistory } from "../../apis/userRegister";
 import { useUser } from '../../context/UserContext';
+import { BackHandler } from "react-native";
+
+
 
 export default function HistoryScreen() {
   const router = useRouter();
@@ -60,6 +63,21 @@ const { user } = useUser();
   );
 console.log("Orders state:", orders);
  
+useEffect(() => {
+  const backAction = () => {
+    router.replace("(tabs)"); // navigate back to tabs
+    return true; // prevent default behavior
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove(); // cleanup
+}, []);
+
+
   useEffect(() => {
     fetchOrders(1);
   }, []);
@@ -71,6 +89,7 @@ console.log("Orders state:", orders);
       fetchOrders(nextPage);
     }
   };
+
 
   const onRefresh = () => {
     setRefreshing(true);

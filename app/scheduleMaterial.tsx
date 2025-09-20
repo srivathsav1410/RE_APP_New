@@ -16,6 +16,8 @@ import { MultiSelect } from "react-native-element-dropdown";
 import * as ImagePicker from "expo-image-picker";
 import { imageUpload, placeOrder } from "../apis/userRegister";
 import { useUser } from "../context/UserContext";
+import { BackHandler } from "react-native";
+
 
 const materialOptions = [
   "Plastic",
@@ -142,6 +144,21 @@ const MaterialScreen = () => {
       );
     }
   };
+
+  useEffect(() => {
+  const backAction = () => {
+    router.push("/scheduleLocation");
+    return true; // prevent app exit
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    "hardwareBackPress",
+    backAction
+  );
+
+  return () => backHandler.remove(); // cleanup
+}, []);
+
 
   useEffect(() => {
     if (showSuccess) {
